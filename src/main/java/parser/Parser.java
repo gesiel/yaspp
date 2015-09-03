@@ -17,7 +17,7 @@ public class Parser {
         outputStream = new ByteArrayOutputStream();
     }
 
-    public OutputStream parse(Object[] pojos) {
+    public OutputStream parse(Object... pojos) {
         if (pojos == null) throw new IllegalArgumentException("Illegal argument: pojo array cannot be null.");
         else if (pojos.length == 0) throw new IllegalArgumentException("Illegal argument: pojo array cannot be empty.");
 
@@ -31,13 +31,10 @@ public class Parser {
             outputStream.write((fields[0].getName() + ";").getBytes());
             outputStream.write("\n".getBytes());
             outputStream.write((fields[0].get(first) + ";").getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+
+            return outputStream;
+        } catch (IOException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
-
-
-        return outputStream;
     }
 }

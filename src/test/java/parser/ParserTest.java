@@ -44,23 +44,19 @@ public class ParserTest {
     public void testWhenEmptyPojoArray_shouldThrowIllegalArgumentException() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Illegal argument: pojo array cannot be empty.");
-        parser.parse(new Object[] {});
+        parser.parse();
     }
 
     @Test
-    public void testWhenThereIsNoAttr_shouldCreateAnEmptyOutputStream() throws Exception {
-        SimplePojo pojo = new SimplePojo();
-        parser.parse(new Object[]{pojo});
-        byte[] bytes = parser.outputStream.toByteArray();
-        assertThat(bytes.length, is(equalTo(0)));
+    public void testWhenThereIsAPojoWithNoAttr_shouldCreateAnEmptyOutputStream() throws Exception {
+        parser.parse(new SimplePojo());
+        assertThat(parser.outputStream.toByteArray().length, is(equalTo(0)));
     }
 
     @Test
     public void testWheThereIsJustOneAttr_shouldCreateAnOutputStreamWithOneColumnAndTwoLines() throws Exception {
-        Pojo pojo = new Pojo();
-        parser.parse(new Object[]{pojo});
-        String result = parser.outputStream.toString();
-        assertThat(result, is(equalTo("propertyName;\n0;")));
+        parser.parse(new Pojo());
+        assertThat(parser.outputStream.toString(), is(equalTo("propertyName;\n0;")));
     }
 
     private class SimplePojo {
