@@ -1,5 +1,6 @@
 package parser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 /**
@@ -7,14 +8,15 @@ import java.io.OutputStream;
  */
 public class Parser {
 
-    private OutputStream outputStream;
+    protected OutputStream outputStream;
 
     public Parser() {
-
+        outputStream = new ByteArrayOutputStream();
     }
 
     public Parser(OutputStream outputStream) {
-        this.outputStream = outputStream;
+        if (outputStream != null) this.outputStream = outputStream;
+        else this.outputStream = new ByteArrayOutputStream();
     }
 
     public OutputStream parse(Object[] pojos) {

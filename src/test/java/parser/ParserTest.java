@@ -10,6 +10,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -19,6 +21,15 @@ public class ParserTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Test
+    public void testWhenThereIsntOutputStream_shouldCreateANewOne() throws Exception {
+        Parser parser = new Parser();
+        assertThat(parser.outputStream, is(notNullValue()));
+
+        parser = new Parser(null);
+        assertThat(parser.outputStream, is(notNullValue()));
+    }
 
     @Test
     public void testWhenThereIsAnExistingOutputStream_parseShouldReturnIts() throws Exception {
@@ -44,5 +55,4 @@ public class ParserTest {
         Parser parser = new Parser();
         parser.parse(new Object[] {});
     }
-
 }
