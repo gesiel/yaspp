@@ -1,26 +1,40 @@
 package parser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.util.Objects;
 
 /**
  * Created by gesiel on 02/09/15.
  */
 public class Parser {
 
-    private OutputStream outputStream;
+    protected ByteArrayOutputStream outputStream;
 
     public Parser() {
-
+        outputStream = new ByteArrayOutputStream();
     }
 
-    public Parser(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
-
-    public OutputStream parse(Object[] pojos) {
+    public OutputStream parse(Object... pojos) {
         if (pojos == null) throw new IllegalArgumentException("Illegal argument: pojo array cannot be null.");
         else if (pojos.length == 0) throw new IllegalArgumentException("Illegal argument: pojo array cannot be empty.");
 
-        return outputStream;
+        Object first = pojos[0];
+        Class pojoClass = first.getClass();
+        Field[] fields = pojoClass.getFields();
+
+        if (fields.length == 0) return outputStream;
+
+        try {
+            outputStream.write((fields[0].getName() + ";").getBytes());
+            outputStream.write("\n".getBytes());
+            outputStream.write((fields[0].get(first) + ";").getBytes());
+
+            return outputStream;
+        } catch (IOException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
