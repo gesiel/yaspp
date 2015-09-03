@@ -54,7 +54,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testWheThereIsJustOneAttr_shouldCreateAnOutputStreamWithOneColumnAndTwoLines() throws Exception {
+    public void testWhenThereIsAPojoWithAttrs_shouldCreateAnOutputStreamWithCSVFormat() throws Exception {
         parser.parse(new Pojo());
         assertThat(parser.outputStream.toString(), is(equalTo("propertyName;\n0;")));
     }
