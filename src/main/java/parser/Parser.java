@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by gesiel on 02/09/15.
@@ -13,6 +15,9 @@ public class Parser {
 
     public static final String SEMI_COLON = ";";
     public static final String NEW_LINE = "\n";
+    public static final List<Class> PRIMITIVE_CLASSES = Arrays.asList(boolean.class, Boolean.class, byte.class, Byte.class, char.class,
+            Character.class, short.class, Short.class, int.class, Integer.class, long.class, Long.class, float.class,
+            Float.class, double.class, Double.class);
 
     private OutputStreamFactory factory;
 
@@ -31,7 +36,7 @@ public class Parser {
 
         try {
             OutputStream outputStream = factory.newOutputStream();
-            if (noFieldsToWrite(fields)) {
+            if (noFieldsToWrite(fields) && noMethodsGetter(methods)) {
                 closeOutputStream(outputStream);
                 return outputStream;
             }
@@ -46,29 +51,46 @@ public class Parser {
         }
     }
 
+    private boolean noMethodsGetter(Method[] methods) {
+        for (Method method : methods) {
+            if (isGetter(method) && isPrimitive(method.getReturnType())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void writePropertiesValuesLines(OutputStream outputStream, Field[] fields, Method[] methods, Object[] pojos) throws IOException, IllegalAccessException, InvocationTargetException {
         for (Object object : pojos) {
             newLine(outputStream);
 
             for (Field field : fields) {
-                writeColumn(outputStream, field.get(object).toString());
+                if (isPrimitive(field.getType())) {
+                    writeColumn(outputStream, field.get(object).toString());
+                }
             }
 
             for (Method method : methods) {
-                if (isGetter(method)) {
+                if (isGetter(method) && isPrimitive(method.getReturnType())) {
                     writeColumn(outputStream, method.invoke(object).toString());
                 }
             }
         }
     }
 
+    private boolean isPrimitive(Class clazz) {
+        return PRIMITIVE_CLASSES.contains(clazz);
+    }
+
     private void writeTitleLine(OutputStream outputStream, Field[] fields, Method[] methods) throws IOException {
         for (Field field : fields) {
-            writeColumn(outputStream, field.getName());
+            if (isPrimitive(field.getType())) {
+                writeColumn(outputStream, field.getName());
+            }
         }
 
         for (Method method : methods) {
-            if (isGetter(method)) {
+            if (isGetter(method) && isPrimitive(method.getReturnType())) {
                 writeColumn(outputStream, cleanGetterName(method));
             }
         }
@@ -96,7 +118,12 @@ public class Parser {
     }
 
     private boolean noFieldsToWrite(Field[] fields) {
-        return fields.length == 0;
+        for (Field field : fields) {
+            if (isPrimitive(field.getType())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void writeColumn(OutputStream outputStream, String fieldName) throws IOException {

@@ -46,6 +46,7 @@ public class ParserTest {
     public void testWhenThereIsAPojoWithNoAttr_shouldCreateAnEmptyOutputStream() throws Exception {
         parser.parse(new PojoWithNoProperties());
         assertThat(outputStream.toByteArray().length, is(equalTo(0)));
+        assertThat(outputStream.toString(), is(equalTo("")));
     }
 
     @Test
@@ -77,6 +78,31 @@ public class ParserTest {
     public void testWhenThereIsPrivateGetterMethod_shouldNotPrintThat() throws Exception {
         parser.parse(new PojoWithPrivateGetterMethod());
         assertThat(outputStream.toString(), is(equalTo("intProperty;doubleProperty;doubleObjectProperty;integerObjectProperty;integerPrivateObjectProperty;\n123456789;12345.12345;54321.54321;987654321;123456;")));
+    }
+
+    @Test
+    public void testWhenThereIsPrivateComplexObjects_shouldNotPrintThat() throws Exception {
+        parser.parse(new PojoWithComplexType());
+        assertThat(outputStream.toString(), is(equalTo("longPublicProperty;\n124;")));
+    }
+
+    @Test
+    public void testWhenThereIsPrivateComplexGetter_shouldNotPrintThat() throws Exception {
+        parser.parse(new PojoWithGetterComplexType());
+        assertThat(outputStream.toString(), is(equalTo("longPublicProperty;\n124;")));
+    }
+
+    @Test
+    public void testWhenThereIsVoidMethodsLikeGetters_shouldNotPrintThat() throws Exception {
+        parser.parse(new PojoWithVoidMethods());
+        assertThat(outputStream.toString(), is(equalTo("char;\nY;")));
+    }
+
+    @Test
+    public void testWhenThereIsNoValidDataToPrint_shouldPrintNothing() throws Exception {
+        parser.parse(new PojoWithNoDataToPrint());
+        assertThat(outputStream.toByteArray().length, is(equalTo(0)));
+        assertThat(outputStream.toString(), is(equalTo("")));
     }
 
     private class PojoWithNoProperties {
@@ -131,5 +157,46 @@ public class ParserTest {
         private String getStringPrivateObjectProperty() {
             return stringPrivateObjectProperty;
         }
+    }
+
+    private class PojoWithComplexType {
+
+        public PojoWithNoProperties pojo;
+        public Long longPublicProperty = 124l;
+
+    }
+
+    private class PojoWithGetterComplexType {
+
+        private PojoWithNoProperties pojo;
+        public Long longPublicProperty = 124l;
+
+        public PojoWithNoProperties getPojo() {
+            return pojo;
+        }
+    }
+
+    private class PojoWithVoidMethods {
+        public void someMethod() {
+
+        }
+
+        public void getSomething() {
+
+        }
+
+        public char getChar() {
+            return 'Y';
+        }
+    }
+
+    private class PojoWithNoDataToPrint {
+        private char charAttr;
+
+        private char getCharAttr() {
+            return charAttr;
+        }
+
+        public char[] charArray;
     }
 }
