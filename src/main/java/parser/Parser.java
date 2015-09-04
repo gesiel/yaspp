@@ -3,6 +3,8 @@ package parser;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Created by gesiel on 02/09/15.
@@ -25,6 +27,7 @@ public class Parser {
         Object first = pojos[0];
         Class pojoClass = first.getClass();
         Field[] fields = pojoClass.getFields();
+        Method[] methods = pojoClass.getMethods();
 
         try {
             OutputStream outputStream = factory.newOutputStream();
@@ -33,30 +36,53 @@ public class Parser {
                 return outputStream;
             }
 
-            writeTitleLine(outputStream, fields);
-            writePropertiesValuesLines(outputStream, fields, pojos);
+            writeTitleLine(outputStream, fields, methods);
+            writePropertiesValuesLines(outputStream, fields, methods, pojos);
 
             closeOutputStream(outputStream);
             return outputStream;
-        } catch (IOException | IllegalAccessException e) {
+        } catch (IOException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void writePropertiesValuesLines(OutputStream outputStream, Field[] fields, Object[] pojos) throws IOException, IllegalAccessException {
+    private void writePropertiesValuesLines(OutputStream outputStream, Field[] fields, Method[] methods, Object[] pojos) throws IOException, IllegalAccessException, InvocationTargetException {
         for (Object object : pojos) {
             newLine(outputStream);
 
             for (Field field : fields) {
                 writeColumn(outputStream, field.get(object).toString());
             }
+
+            for (Method method : methods) {
+                String methodName = method.getName();
+                if(methodName.startsWith("get") &&
+                        method.getParameterTypes().length == 0 &&
+                        !void.class.equals(method.getReturnType()) &&
+                        !methodName.contains("Class")) {
+                    writeColumn(outputStream, method.invoke(object).toString());
+                }
+            }
         }
     }
 
-    private void writeTitleLine(OutputStream outputStream, Field[] fields) throws IOException {
+    private void writeTitleLine(OutputStream outputStream, Field[] fields, Method[] methods) throws IOException {
         for (Field field : fields) {
             writeColumn(outputStream, field.getName());
         }
+
+        for (Method method : methods) {
+            String methodName = method.getName();
+            if(methodName.startsWith("get") &&
+                method.getParameterTypes().length == 0 &&
+                !void.class.equals(method.getReturnType()) &&
+                    !methodName.contains("Class")) {
+                methodName = methodName.substring(3);
+                methodName = Character.toLowerCase(methodName.charAt(0)) + methodName.substring(1);
+                writeColumn(outputStream, methodName);
+            }
+        }
+
     }
 
     private void closeOutputStream(OutputStream outputStream) throws IOException {

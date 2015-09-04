@@ -1,5 +1,6 @@
 package parser;
 
+import oracle.jrockit.jfr.StringConstantPool;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,6 +63,18 @@ public class ParserTest {
         assertThat(outputStream.toString(), is(equalTo("intProperty;doubleProperty;doubleObjectProperty;integerObjectProperty;\n123456789;12345.12345;54321.54321;987654321;")));
     }
 
+    @Test
+    public void testWhenThereIsPrivateAttrs_shouldNotPrintThatField() throws Exception {
+        parser.parse(new PojoWithMoreThenOnePublicPropertyAndSomePrivateFields());
+        assertThat(outputStream.toString(), is(equalTo("intProperty;doubleProperty;doubleObjectProperty;integerObjectProperty;\n123456789;12345.12345;54321.54321;987654321;")));
+    }
+
+    @Test
+    public void testWhenThereIsPublicGetterMethod_shouldPrintThatAsAField() throws Exception {
+        parser.parse(new PojoWithMoreThenOnePublicPropertyAndSomePrivateFieldsWithPublicGetterMethods());
+        assertThat(outputStream.toString(), is(equalTo("intProperty;doubleProperty;doubleObjectProperty;integerObjectProperty;integerPrivateObjectProperty;\n123456789;12345.12345;54321.54321;987654321;123456;")));
+    }
+
     private class PojoWithNoProperties {
 
     }
@@ -75,5 +88,27 @@ public class ParserTest {
         public double doubleProperty = 12345.12345;
         public Double doubleObjectProperty = 54321.54321;
         public Integer integerObjectProperty = 987654321;
+    }
+
+    private class PojoWithMoreThenOnePublicPropertyAndSomePrivateFields {
+        public int intProperty = 123456789;
+        public double doubleProperty = 12345.12345;
+        public Double doubleObjectProperty = 54321.54321;
+        public Integer integerObjectProperty = 987654321;
+        private String stringPrivateObjectProperty = "That's it";
+        private Integer integerPrivateObjectProperty = 987654321;
+    }
+
+    private class PojoWithMoreThenOnePublicPropertyAndSomePrivateFieldsWithPublicGetterMethods {
+        public int intProperty = 123456789;
+        public double doubleProperty = 12345.12345;
+        public Double doubleObjectProperty = 54321.54321;
+        public Integer integerObjectProperty = 987654321;
+        private String stringPrivateObjectProperty = "That's it";
+        private Integer integerPrivateObjectProperty = 123456;
+
+        public Integer getIntegerPrivateObjectProperty() {
+            return integerPrivateObjectProperty;
+        }
     }
 }
