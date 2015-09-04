@@ -1,17 +1,16 @@
 package parser;
 
-import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.hasSize;
 
 /**
  * Created by gesiel on 02/09/15.
@@ -22,15 +21,12 @@ public class ParserTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     private Parser parser;
+    private ByteArrayOutputStream outputStream;
 
     @Before
     public void setUp() throws Exception {
-        parser = new Parser();
-    }
-
-    @Test
-    public void testWhenThereIsntOutputStream_shouldCreateANewOne() throws Exception {
-        assertThat(parser.outputStream, is(notNullValue()));
+        outputStream = new ByteArrayOutputStream();
+        parser = new Parser(() -> outputStream);
     }
 
     @Test
@@ -49,21 +45,35 @@ public class ParserTest {
 
     @Test
     public void testWhenThereIsAPojoWithNoAttr_shouldCreateAnEmptyOutputStream() throws Exception {
-        parser.parse(new SimplePojo());
-        assertThat(parser.outputStream.toByteArray().length, is(equalTo(0)));
+        parser.parse(new PojoWithNoProperties());
+        assertThat(outputStream.toByteArray().length, is(equalTo(0)));
     }
 
     @Test
-    public void testWhenThereIsAPojoWithAttrs_shouldCreateAnOutputStreamWithCSVFormat() throws Exception {
-        parser.parse(new Pojo());
-        assertThat(parser.outputStream.toString(), is(equalTo("propertyName;\n0;")));
+    public void testWhenThereIsAPojoWithOnePublicAttr_shouldCreateAnOutputStreamWithOneColumn() throws Exception {
+        parser.parse(new PojoWithOnePublicProperty());
+        assertThat(outputStream.toString(), is(equalTo("propertyName;\n0;")));
     }
 
-    private class SimplePojo {
+
+    @Test
+    public void testWhenThereIsAPojoWithMoreThanOnePublicAttr_shouldCreateAnOutputStreamWithAllColumns() throws Exception {
+        parser.parse(new PojoWithMoreThenOnePublicProperty());
+        assertThat(outputStream.toString(), is(equalTo("intProperty;doubleProperty;doubleObjectProperty;integerObjectProperty;\n123456789;12345.12345;54321.54321;987654321;")));
+    }
+
+    private class PojoWithNoProperties {
 
     }
 
-    private class Pojo {
+    private class PojoWithOnePublicProperty {
         public int propertyName;
+    }
+
+    private class PojoWithMoreThenOnePublicProperty {
+        public int intProperty = 123456789;
+        public double doubleProperty = 12345.12345;
+        public Double doubleObjectProperty = 54321.54321;
+        public Integer integerObjectProperty = 987654321;
     }
 }
