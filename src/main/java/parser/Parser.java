@@ -55,11 +55,7 @@ public class Parser {
             }
 
             for (Method method : methods) {
-                String methodName = method.getName();
-                if(methodName.startsWith("get") &&
-                        method.getParameterTypes().length == 0 &&
-                        !void.class.equals(method.getReturnType()) &&
-                        !methodName.contains("Class")) {
+                if (isGetter(method)) {
                     writeColumn(outputStream, method.invoke(object).toString());
                 }
             }
@@ -72,17 +68,26 @@ public class Parser {
         }
 
         for (Method method : methods) {
-            String methodName = method.getName();
-            if(methodName.startsWith("get") &&
-                method.getParameterTypes().length == 0 &&
-                !void.class.equals(method.getReturnType()) &&
-                    !methodName.contains("Class")) {
-                methodName = methodName.substring(3);
-                methodName = Character.toLowerCase(methodName.charAt(0)) + methodName.substring(1);
-                writeColumn(outputStream, methodName);
+            if (isGetter(method)) {
+                writeColumn(outputStream, cleanGetterName(method));
             }
         }
+    }
 
+    private boolean isGetter(Method method) {
+        String methodName = method.getName();
+        if (!methodName.startsWith("get")) return false;
+        if (method.getParameterTypes().length != 0) return false;
+        if (void.class.equals(method.getReturnType())) return false;
+        if (methodName.equals("getClass")) return false;
+        return true;
+    }
+
+    private String cleanGetterName(Method method) {
+        String methodName = method.getName();
+        methodName = methodName.substring(3);
+        methodName = Character.toLowerCase(methodName.charAt(0)) + methodName.substring(1);
+        return methodName;
     }
 
     private void closeOutputStream(OutputStream outputStream) throws IOException {
