@@ -19,94 +19,94 @@ public class CSVParserTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private Parser CSVParser;
+    private Parser csvparser;
     private ByteArrayOutputStream outputStream;
 
     @Before
     public void setUp() throws Exception {
         outputStream = new ByteArrayOutputStream();
-        CSVParser = new CSVParser(() -> outputStream);
+        csvparser = new CSVParser(() -> outputStream);
     }
 
     @Test
     public void testWhenNullPojoArray_shouldThrowIllegalArgumentException() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Illegal argument: pojo array cannot be null.");
-        CSVParser.parse(null);
+        csvparser.parse((Object[]) null);
     }
 
     @Test
     public void testWhenEmptyPojoArray_shouldThrowIllegalArgumentException() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Illegal argument: pojo array cannot be empty.");
-        CSVParser.parse();
+        csvparser.parse();
     }
 
     @Test
     public void testWhenAPojoWithNoAttr_shouldCreateAnEmptyOutputStream() throws Exception {
-        CSVParser.parse(new PojoWithNoProperties());
+        csvparser.parse(new PojoWithNoProperties());
         assertThat(outputStream.toByteArray().length, is(equalTo(0)));
         assertThat(outputStream.toString(), is(equalTo("")));
     }
 
     @Test
     public void testWhenAPojoWithOnePublicAttr_shouldCreateAnOutputStreamWithOneColumn() throws Exception {
-        CSVParser.parse(new PojoWithOnePublicProperty());
+        csvparser.parse(new PojoWithOnePublicProperty());
         assertThat(outputStream.toString(), is(equalTo("propertyName,\n0,")));
     }
 
     @Test
     public void testWhenAPojoWithMoreThanOnePublicAttr_shouldCreateAnOutputStreamWithAllColumns() throws Exception {
-        CSVParser.parse(new PojoWithMoreThenOnePublicProperty());
+        csvparser.parse(new PojoWithMoreThenOnePublicProperty());
         assertThat(outputStream.toString(), is(equalTo("intProperty,doubleProperty,doubleObjectProperty,integerObjectProperty,\n123456789,12345.12345,54321.54321,987654321,")));
     }
 
     @Test
     public void testWhenPrivateAttrs_shouldNotPrintThatField() throws Exception {
-        CSVParser.parse(new PojoWithPrivateFields());
+        csvparser.parse(new PojoWithPrivateFields());
         assertThat(outputStream.toString(), is(equalTo("intProperty,doubleProperty,doubleObjectProperty,integerObjectProperty,\n123456789,12345.12345,54321.54321,987654321,")));
     }
 
     @Test
     public void testWhenPublicGetterMethod_shouldPrintThatAsAField() throws Exception {
-        CSVParser.parse(new PojoWithPublicGetterMethod());
+        csvparser.parse(new PojoWithPublicGetterMethod());
         assertThat(outputStream.toString(), is(equalTo("intProperty,doubleProperty,doubleObjectProperty,integerObjectProperty,integerPrivateObjectProperty,\n123456789,12345.12345,54321.54321,987654321,123456,")));
     }
 
     @Test
     public void testWhenPrivateGetterMethod_shouldNotPrintThat() throws Exception {
-        CSVParser.parse(new PojoWithPrivateGetterMethod());
+        csvparser.parse(new PojoWithPrivateGetterMethod());
         assertThat(outputStream.toString(), is(equalTo("intProperty,doubleProperty,doubleObjectProperty,integerObjectProperty,integerPrivateObjectProperty,\n123456789,12345.12345,54321.54321,987654321,123456,")));
     }
 
     @Test
     public void testWhenPrivateComplexObjects_shouldNotPrintThat() throws Exception {
-        CSVParser.parse(new PojoWithComplexType());
+        csvparser.parse(new PojoWithComplexType());
         assertThat(outputStream.toString(), is(equalTo("longPublicProperty,\n124,")));
     }
 
     @Test
     public void testWhenPrivateComplexGetter_shouldNotPrintThat() throws Exception {
-        CSVParser.parse(new PojoWithGetterComplexType());
+        csvparser.parse(new PojoWithGetterComplexType());
         assertThat(outputStream.toString(), is(equalTo("longPublicProperty,\n124,")));
     }
 
     @Test
     public void testWhenVoidMethodsLikeGetters_shouldNotPrintThat() throws Exception {
-        CSVParser.parse(new PojoWithVoidMethods());
+        csvparser.parse(new PojoWithVoidMethods());
         assertThat(outputStream.toString(), is(equalTo("char,\nY,")));
     }
 
     @Test
     public void testWhenNoValidDataToPrint_shouldPrintNothing() throws Exception {
-        CSVParser.parse(new PojoWithNoDataToPrint());
+        csvparser.parse(new PojoWithNoDataToPrint());
         assertThat(outputStream.toByteArray().length, is(equalTo(0)));
         assertThat(outputStream.toString(), is(equalTo("")));
     }
 
     @Test
     public void testWhenNullValues_shouldPrintNullWord() throws Exception {
-        CSVParser.parse(new PojoWithNullValues());
+        csvparser.parse(new PojoWithNullValues());
         assertThat(outputStream.toString(), is(equalTo("intProperty,doubleProperty,doubleObjectProperty,integerObjectProperty,integerPrivateObjectProperty,stringPrivateObjectProperty,\n123456789,12345.12345,54321.54321,null,123456,null,")));
     }
 
