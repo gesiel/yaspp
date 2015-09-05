@@ -32,7 +32,7 @@ public class CSVParserTest {
     public void testWhenNullPojoArray_shouldThrowIllegalArgumentException() throws Exception {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Illegal argument: pojo array cannot be null.");
-        csvparser.parse(null);
+        csvparser.parse((Object[]) null);
     }
 
     @Test

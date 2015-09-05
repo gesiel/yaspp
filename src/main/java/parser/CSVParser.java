@@ -14,14 +14,14 @@ import java.util.logging.Logger;
  */
 class CSVParser implements Parser {
 
+    private static final Logger LOGGER = Logger.getLogger(CSVParser.class.getName());
+
     private static final String COMMA = ",";
     private static final String NEW_LINE = "\n";
     private static final List<Class> PRIMITIVE_CLASSES = Arrays.asList(boolean.class, Boolean.class, byte.class, Byte.class, char.class,
             Character.class, short.class, Short.class, int.class, Integer.class, long.class, Long.class, float.class,
             Float.class, double.class, Double.class, String.class);
-
-    private static final Logger LOGGER = Logger.getLogger(CSVParser.class.getName());
-
+    
     private OutputStreamGateway gateway;
 
     public CSVParser(OutputStreamGateway gateway) {
