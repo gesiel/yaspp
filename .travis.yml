@@ -2,4 +2,4 @@ language: java
 jdk:
   - oraclejdk8
 script:
-  - gradle test
+  - gradle test -i
