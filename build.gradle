@@ -1,12 +1,12 @@
-group 'gsilva'
-version '0.2-SNAPSHOT'
-
 plugins {
     id 'net.saliman.cobertura' version '2.3.1'
     id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
 cobertura.coverageFormats = ['xml']
+
+group 'gsilva'
+version '0.2-SNAPSHOT'
 
 apply plugin: 'java'
 
